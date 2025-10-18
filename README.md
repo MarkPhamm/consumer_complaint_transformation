@@ -11,14 +11,24 @@ This project processes consumer complaint data from the Consumer Financial Prote
 - **Source**: Consumer Complaints Database
 - **Table**: `CONSUMER_COMPLAINTS_DB.RAW.RAW__CONSUMER_COMPLAINTS`
 - **Records**: Consumer complaint submissions with detailed information about products, issues, companies, and responses
+- **Data Ingestion**: Raw data is extracted and loaded via the [Consumer Complaint Pipeline](https://github.com/MarkPhamm/consumer_complaint_pipeline) repository, which handles automated data extraction from the Consumer Financial Protection Bureau (CFPB) API and loads it into Snowflake
 
 ## Architecture
 
 ### Data Flow
 
 ```
-Raw Data → Staging Layer → Marts Layer (Star Schema)
+CFPB API → [Consumer Complaint Pipeline](https://github.com/MarkPhamm/consumer_complaint_pipeline) → Snowflake Raw → Staging Layer → Marts Layer (Star Schema)
 ```
+
+### Complete Data Pipeline Architecture
+
+This transformation project is part of a larger data pipeline ecosystem:
+
+1. **Data Ingestion**: [Consumer Complaint Pipeline](https://github.com/MarkPhamm/consumer_complaint_pipeline) - Automated extraction from CFPB API using Apache Airflow
+2. **Data Transformation**: This repository - dbt Fusion-based star schema transformation
+3. **Data Storage**: Snowflake data warehouse with structured schemas
+4. **Data Analysis**: Ready for business intelligence and analytical reporting
 
 ### Project Structure
 
