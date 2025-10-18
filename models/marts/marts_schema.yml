@@ -1,0 +1,183 @@
+version: 2
+
+models:
+  - name: dim_companies
+    description: Dimension table containing company information and response patterns
+    columns:
+      - name: company_key
+        description: Surrogate key for company dimension
+        tests:
+          - unique
+          - not_null
+      - name: company_name
+        description: Name of the company
+        tests:
+          - not_null
+      - name: company_public_response
+        description: Company's public response to complaints
+      - name: company_response_to_consumer
+        description: Company's response to the consumer
+      - name: timely_response_flag
+        description: Boolean flag indicating if company provided timely response
+      - name: consumer_disputed_flag
+        description: Boolean flag indicating if consumer disputed the response
+
+  - name: dim_products
+    description: Dimension table containing product and sub-product information
+    columns:
+      - name: product_key
+        description: Surrogate key for product dimension
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: Name of the product
+        tests:
+          - not_null
+      - name: sub_product_name
+        description: Name of the sub-product
+      - name: product_full_name
+        description: Combined product and sub-product name
+
+  - name: dim_issues
+    description: Dimension table containing issue and sub-issue information
+    columns:
+      - name: issue_key
+        description: Surrogate key for issue dimension
+        tests:
+          - unique
+          - not_null
+      - name: issue_name
+        description: Name of the issue
+        tests:
+          - not_null
+      - name: sub_issue_name
+        description: Name of the sub-issue
+      - name: issue_full_name
+        description: Combined issue and sub-issue name
+
+  - name: dim_locations
+    description: Dimension table containing geographic information
+    columns:
+      - name: location_key
+        description: Surrogate key for location dimension
+        tests:
+          - unique
+          - not_null
+      - name: state_code
+        description: Two-letter state code
+      - name: zip_code
+        description: ZIP code
+      - name: location_description
+        description: Combined state and zip description
+
+  - name: dim_dates
+    description: Dimension table containing date information with various date attributes
+    columns:
+      - name: date_key
+        description: Surrogate key for date dimension
+        tests:
+          - unique
+          - not_null
+      - name: complaint_date
+        description: The actual complaint date
+        tests:
+          - not_null
+      - name: year
+        description: Year extracted from complaint date
+      - name: month
+        description: Month extracted from complaint date
+      - name: day
+        description: Day extracted from complaint date
+      - name: quarter
+        description: Quarter extracted from complaint date
+      - name: day_of_week
+        description: Day of week (1=Sunday, 7=Saturday)
+      - name: day_of_year
+        description: Day of year (1-366)
+      - name: month_start
+        description: First day of the month
+      - name: quarter_start
+        description: First day of the quarter
+      - name: year_start
+        description: First day of the year
+      - name: day_type
+        description: Whether it's a weekday or weekend
+      - name: season
+        description: Season of the year
+
+  - name: fct_complaints
+    description: Fact table containing complaint facts with foreign keys to all dimensions
+    columns:
+      - name: complaint_id
+        description: Unique identifier for each complaint
+        tests:
+          - unique
+          - not_null
+      - name: company_key
+        description: Foreign key to dim_companies
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_companies')
+                field: company_key
+      - name: product_key
+        description: Foreign key to dim_products
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_key
+      - name: issue_key
+        description: Foreign key to dim_issues
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_issues')
+                field: issue_key
+      - name: location_key
+        description: Foreign key to dim_locations
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_locations')
+                field: location_key
+      - name: date_received_key
+        description: Foreign key to dim_dates for date received
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
+      - name: date_sent_key
+        description: Foreign key to dim_dates for date sent to company
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
+      - name: date_received
+        description: Date when complaint was received
+      - name: date_sent_to_company
+        description: Date when complaint was sent to company
+      - name: days_to_send_to_company
+        description: Number of days between received and sent dates
+      - name: consumer_consent_provided_flag
+        description: Boolean flag for consumer consent
+      - name: timely_response_flag
+        description: Boolean flag for timely response
+      - name: consumer_disputed_flag
+        description: Boolean flag for consumer dispute
+      - name: tags
+        description: Tags associated with the complaint
+      - name: submitted_via
+        description: Channel through which complaint was submitted
+      - name: complaint_description
+        description: Detailed description of what happened
+      - name: company_public_response
+        description: Company's public response
+      - name: load_timestamp
+        description: When the data was loaded
