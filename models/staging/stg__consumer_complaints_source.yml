@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: RAW__CONSUMER_COMPLAINTS
+    description: Raw consumer complaints data from Consumer Complaints API
+    database: CONSUMER_COMPLAINTS_DB
+    schema: RAW
+    tables:
+      - name: RAW__CONSUMER_COMPLAINTS
+        description: Raw consumer complaints table

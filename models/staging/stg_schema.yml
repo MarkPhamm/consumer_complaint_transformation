@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: stg__consumer_complaints
+    config:
+      materialized: view
+      schema: staging
+      tags: [staging]
+      enabled: true
