@@ -131,9 +131,8 @@ models:
                 to: ref('dim_products')
                 field: product_key
       - name: issue_key
-        description: Foreign key to dim_issues
+        description: Foreign key to dim_issues (nullable when issue is not specified)
         tests:
-          - not_null
           - relationships:
               arguments:
                 to: ref('dim_issues')

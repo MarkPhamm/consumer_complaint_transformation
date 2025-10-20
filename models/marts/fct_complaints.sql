@@ -28,11 +28,17 @@ complaints_with_keys AS (
     SELECT
         COMPLAINT_ID AS complaint_id,
         
-        -- Foreign Keys to Dimensions
+        -- Foreign Keys to Dimensions (set to NULL when source values are NULL to maintain referential integrity)
         {{ dbt_utils.generate_surrogate_key(['COMPANY']) }} AS company_key,
         {{ dbt_utils.generate_surrogate_key(['PRODUCT', 'SUB_PRODUCT']) }} AS product_key,
-        {{ dbt_utils.generate_surrogate_key(['ISSUE', 'SUB_ISSUE']) }} AS issue_key,
-        {{ dbt_utils.generate_surrogate_key(['STATE', 'ZIP_CODE']) }} AS location_key,
+        CASE 
+            WHEN ISSUE IS NOT NULL THEN {{ dbt_utils.generate_surrogate_key(['ISSUE', 'SUB_ISSUE']) }}
+            ELSE NULL
+        END AS issue_key,
+        CASE 
+            WHEN STATE IS NOT NULL OR ZIP_CODE IS NOT NULL THEN {{ dbt_utils.generate_surrogate_key(['STATE', 'ZIP_CODE']) }}
+            ELSE NULL
+        END AS location_key,
         {{ dbt_utils.generate_surrogate_key(['DATE_RECEIVED']) }} AS date_received_key,
         {{ dbt_utils.generate_surrogate_key(['DATE_SENT_TO_COMPANY']) }} AS date_sent_key,
         
