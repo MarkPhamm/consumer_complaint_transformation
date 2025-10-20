@@ -13,6 +13,9 @@ This project processes consumer complaint data from the Consumer Financial Prote
 - **Records**: Consumer complaint submissions with detailed information about products, issues, companies, and responses
 - **Data Ingestion**: Raw data is extracted and loaded via the [Consumer Complaint Pipeline](https://github.com/MarkPhamm/consumer_complaint_pipeline) repository, which handles automated data extraction from the Consumer Financial Protection Bureau (CFPB) API and loads it into Snowflake
 
+## Semantic Layers with metric flow
+<img width="1066" height="736" alt="image" src="https://github.com/user-attachments/assets/e08b6e73-c527-4196-9c73-23ae80d182cb" />
+
 ## Architecture
 
 ### Data Flow
