@@ -1,0 +1,7 @@
+models:
+  - name: metricflow_time_spine
+    description: Date spine for MetricFlow metrics
+    columns:
+      - name: date_day
+        description: Date column for time spine
+

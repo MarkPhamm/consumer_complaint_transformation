@@ -1,0 +1,58 @@
+semantic_models:
+  - name: complaints
+    description: Consumer complaints semantic model
+    model: ref('fct_complaints')
+    defaults:
+      agg_time_dimension: date_received
+    
+    entities:
+      - name: complaint
+        type: primary
+        expr: complaint_id
+      - name: company
+        type: foreign
+        expr: company_key
+      - name: product
+        type: foreign
+        expr: product_key
+      - name: issue
+        type: foreign
+        expr: issue_key
+      - name: location
+        type: foreign
+        expr: location_key
+    
+    dimensions:
+      - name: date_received
+        type: time
+        type_params:
+          time_granularity: day
+        expr: date_received
+      - name: date_sent_to_company
+        type: time
+        type_params:
+          time_granularity: day
+        expr: date_sent_to_company
+      - name: consumer_consent_provided_flag
+        type: categorical
+        expr: consumer_consent_provided_flag
+      - name: timely_response_flag
+        type: categorical
+        expr: timely_response_flag
+      - name: consumer_disputed_flag
+        type: categorical
+        expr: consumer_disputed_flag
+      - name: submitted_via
+        type: categorical
+        expr: submitted_via
+    
+    measures:
+      - name: total_complaints
+        description: Total number of complaints
+        agg: count
+        expr: complaint_id
+      - name: avg_days_to_send
+        description: Average days to send complaint to company
+        agg: average
+        expr: days_to_send_to_company
+

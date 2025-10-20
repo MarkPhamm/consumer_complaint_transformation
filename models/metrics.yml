@@ -1,0 +1,15 @@
+metrics:
+  - name: total_complaints
+    description: Total number of consumer complaints
+    type: simple
+    label: Total Complaints
+    type_params:
+      measure: total_complaints
+  
+  - name: avg_response_time_days
+    description: Average days to send complaint to company
+    type: simple
+    label: Average Response Time (Days)
+    type_params:
+      measure: avg_days_to_send
+

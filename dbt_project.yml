@@ -41,6 +41,9 @@ models:
       +schema: MARTS
       +enabled: true
       +tags: ['marts']
+      time_spine:
+        +enabled: true
+        +materialized: table
 
 seeds:
   consumer_complaints_transformation:
