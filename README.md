@@ -13,8 +13,203 @@ This project processes consumer complaint data from the Consumer Financial Prote
 - **Records**: Consumer complaint submissions with detailed information about products, issues, companies, and responses
 - **Data Ingestion**: Raw data is extracted and loaded via the [Consumer Complaint Pipeline](https://github.com/MarkPhamm/consumer_complaint_pipeline) repository, which handles automated data extraction from the Consumer Financial Protection Bureau (CFPB) API and loads it into Snowflake
 
-## Semantic Layers with metric flow
+## Semantic Layers with MetricFlow
+
 <img width="1066" height="736" alt="image" src="https://github.com/user-attachments/assets/e08b6e73-c527-4196-9c73-23ae80d182cb" />
+
+### What are Semantic Layers?
+
+A **semantic layer** is an abstraction layer that provides a business-friendly view of your data warehouse. It translates technical database schemas into business concepts that users can understand and query directly. Key components include:
+
+- **Semantic Models**: Define how raw data maps to business entities
+- **Metrics**: Business KPIs and calculations
+- **Dimensions**: Attributes for slicing and dicing data
+- **Entities**: Business objects that metrics can be grouped by
+- **Measures**: Quantifiable values that can be aggregated
+
+### What is MetricFlow?
+
+**MetricFlow** is a semantic layer that sits on top of your dbt models, providing a standardized way to define, query, and analyze business metrics. It acts as a translation layer between business questions and SQL queries, enabling consistent metric definitions across different tools and users.
+
+### Key Benefits of MetricFlow
+
+- **Consistent Metrics**: Single source of truth for metric definitions
+- **Self-Service Analytics**: Business users can query metrics without writing SQL
+- **Time Intelligence**: Built-in support for time-based analysis and comparisons
+- **Flexible Querying**: Support for complex analytical queries with automatic SQL generation
+- **Tool Agnostic**: Works with various BI tools and can be accessed via API
+
+### MetricFlow Implementation in This Project
+
+Our consumer complaint transformation project implements MetricFlow through several key components:
+
+#### 1. Semantic Model Configuration (`semantic_models.yml`)
+
+```yaml
+semantic_models:
+  - name: complaints
+    description: Consumer complaints semantic model
+    model: ref('fct_complaints')
+    defaults:
+      agg_time_dimension: date_received
+    
+    entities:
+      - name: complaint
+        type: primary
+        expr: complaint_id
+      - name: company
+        type: foreign
+        expr: company_key
+      - name: product
+        type: foreign
+        expr: product_key
+      - name: issue
+        type: foreign
+        expr: issue_key
+      - name: location
+        type: foreign
+        expr: location_key
+    
+    dimensions:
+      - name: date_received
+        type: time
+        type_params:
+          time_granularity: day
+        expr: date_received
+      - name: consumer_consent_provided_flag
+        type: categorical
+        expr: consumer_consent_provided_flag
+      # ... additional dimensions
+    
+    measures:
+      - name: total_complaints
+        description: Total number of complaints
+        agg: count
+        expr: complaint_id
+      - name: avg_days_to_send
+        description: Average days to send complaint to company
+        agg: average
+        expr: days_to_send_to_company
+```
+
+#### 2. Metrics Definition (`metrics.yml`)
+
+```yaml
+metrics:
+  - name: total_complaints
+    description: Total number of consumer complaints
+    type: simple
+    label: Total Complaints
+    type_params:
+      measure: total_complaints
+  
+  - name: avg_response_time_days
+    description: Average days to send complaint to company
+    type: simple
+    label: Average Response Time (Days)
+    type_params:
+      measure: avg_days_to_send
+```
+
+#### 3. Time Spine Configuration (`metricflow_time_spine.yml`)
+
+```yaml
+models:
+  - name: metricflow_time_spine
+    description: Date spine for MetricFlow metrics
+    columns:
+      - name: date_day
+        description: Date column for time spine
+```
+
+### Available Metrics and Dimensions
+
+Based on our MetricFlow configuration, the following metrics and dimensions are available:
+
+#### Metrics
+
+- **`total_complaints`**: Total number of consumer complaints
+- **`avg_response_time_days`**: Average days to send complaint to company
+
+#### Dimensions
+
+- **`complaint__date_received`**: Date when complaint was received (time dimension)
+- **`complaint__date_sent_to_company`**: Date when complaint was sent to company (time dimension)
+- **`complaint__consumer_consent_provided_flag`**: Whether consumer provided consent
+- **`complaint__timely_response_flag`**: Whether company provided timely response
+- **`complaint__consumer_disputed_flag`**: Whether consumer disputed the response
+- **`complaint__submitted_via`**: Method used to submit complaint
+- **`metric_time`**: Default time dimension for metric queries
+
+### Querying Metrics with MetricFlow
+
+#### Command Line Interface
+
+```bash
+# List available metrics
+mf list metrics
+
+# List dimensions for a specific metric
+mf list dimensions --metrics total_complaints
+
+# Query metrics with dimensions
+mf query --metrics total_complaints --group-by complaint__date_received__day --order complaint__date_received__day --limit 10
+
+# Query multiple metrics
+mf query --metrics total_complaints avg_response_time_days --group-by complaint__submitted_via
+
+# Time-based analysis
+mf query --metrics total_complaints --group-by metric_time__month --order metric_time__month
+```
+
+#### Example Query Results
+
+```
+COMPLAINT__DATE_RECEIVED__DAY      TOTAL_COMPLAINTS
+-------------------------------  ------------------
+2011-12-01T00:00:00                              38
+2011-12-02T00:00:00                              37
+2011-12-03T00:00:00                               7
+2011-12-04T00:00:00                               3
+2011-12-05T00:00:00                              59
+```
+
+### Integration with BI Tools
+
+MetricFlow can be integrated with various business intelligence tools:
+
+- **dbt Semantic Layer**: Native integration for dbt Cloud users
+- **REST API**: Programmatic access to metrics
+- **SQL Interface**: Direct SQL querying capabilities
+- **Custom Applications**: Embed metrics in custom dashboards
+
+### Validation and Testing
+
+```bash
+# Validate MetricFlow configuration
+mf validate-configs
+
+# Test semantic model definitions
+mf validate-semantic-model complaints
+
+# Check for configuration errors
+mf validate-configs --show-all
+```
+
+### Benefits for Business Users
+
+1. **Self-Service Analytics**: Business users can query metrics without technical SQL knowledge
+2. **Consistent Definitions**: All users access the same metric calculations
+3. **Flexible Analysis**: Easy slicing and dicing across multiple dimensions
+4. **Time Intelligence**: Built-in support for period-over-period comparisons
+5. **Governance**: Centralized control over metric definitions and business logic
+
+### Future Enhancements
+
+- **Derived Metrics**: Complex calculations combining multiple base metrics
+- **Metric Filters**: Pre-defined filters for common business scenarios
+- **Custom Aggregations**: Advanced aggregation methods beyond standard SQL functions
+- **Metric Lineage**: Track dependencies and impact analysis for metric changes
 
 ## Architecture
 
